@@ -1,21 +1,17 @@
 import Head from 'next/head';
 import { NextPage, GetStaticProps, GetStaticPaths } from 'next';
-import {
-  ContentfulPage,
-  fetchPage,
-  ContentfulSidebar,
-  fetchSidebar,
-  fetchPages,
-} from '../contentful/data';
-import { renderDocument } from '../contentful/render';
+import { renderRichText } from '../contentful/render';
 import Sidebar from '../components/Sidebar';
 import { Fragment } from 'react';
-import { getOpenGraphImageUrl } from '../contentful/utils';
+import { getOGImageUrl } from '../contentful/utils';
 import NotFoundPage from './404';
 import HeroImage from '../components/HeroImage';
 import ContentBlock from '../components/ContentBlock';
 import MainContent from '../components/MainContent';
 import { siteName } from '../config';
+import { fetchPageSlugs } from '../contentful/pageSlugs';
+import { fetchPage, ContentfulPage } from '../contentful/page';
+import { fetchSidebar, ContentfulSidebar } from '../contentful/sidebar';
 
 interface Props {
   page: ContentfulPage | null;
@@ -27,7 +23,7 @@ const StandardPage: NextPage<Props> = ({ page, sidebar }) => {
     return <NotFoundPage />;
   }
 
-  const ogImageUrl = getOpenGraphImageUrl(page.image);
+  const { image, content } = page;
 
   return (
     <MainContent>
@@ -36,9 +32,9 @@ const StandardPage: NextPage<Props> = ({ page, sidebar }) => {
           {page.title} – {siteName}
         </title>
         <meta property="og:title" content={page.title} />
-        {ogImageUrl && (
+        {image && (
           <Fragment>
-            <meta property="og:image" content={ogImageUrl} />
+            <meta property="og:image" content={getOGImageUrl(image.url)} />
             <meta name="twitter:card" content="summary_large_image" />
           </Fragment>
         )}
@@ -46,11 +42,11 @@ const StandardPage: NextPage<Props> = ({ page, sidebar }) => {
 
       <div className="page">
         <h1>{page.title}</h1>
-        {page.image && <HeroImage image={page.image} />}
-        {page.content && <ContentBlock content={page.content} />}
+        {image && <HeroImage url={image.url} title={image.title} />}
+        {content && <ContentBlock content={content} />}
       </div>
 
-      {sidebar && <Sidebar>{renderDocument(sidebar.content)}</Sidebar>}
+      {sidebar?.content && <Sidebar>{renderRichText(sidebar.content)}</Sidebar>}
     </MainContent>
   );
 };
@@ -65,7 +61,7 @@ export const getStaticProps: GetStaticProps = async ({ params, preview }) => {
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const pages = await fetchPages();
+  const pages = await fetchPageSlugs();
   const paths = pages.map((page) => ({
     params: { slug: page.slug.split('/') },
   }));

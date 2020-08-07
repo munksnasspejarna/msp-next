@@ -1,16 +1,12 @@
 import Head from 'next/head';
 import { NextPage, GetStaticProps } from 'next';
-import {
-  fetchContacts,
-  fetchSidebar,
-  ContentfulSidebar,
-  ContentfulContact,
-} from '../contentful/data';
 import Contact from '../components/Contact';
 import Sidebar from '../components/Sidebar';
-import { renderDocument } from '../contentful/render';
+import { renderRichText } from '../contentful/render';
 import MainContent from '../components/MainContent';
 import { siteName } from '../config';
+import { fetchContacts, ContentfulContact } from '../contentful/contacts';
+import { fetchSidebar, ContentfulSidebar } from '../contentful/sidebar';
 
 interface Props {
   contacts: ContentfulContact[];
@@ -32,7 +28,7 @@ const ContactPage: NextPage<Props> = ({ contacts, sidebar }) => (
       </div>
     </div>
 
-    {sidebar && <Sidebar>{renderDocument(sidebar.content)}</Sidebar>}
+    {sidebar?.content && <Sidebar>{renderRichText(sidebar.content)}</Sidebar>}
 
     <style jsx>{`
       .contacts {
@@ -51,7 +47,7 @@ const ContactPage: NextPage<Props> = ({ contacts, sidebar }) => (
   </MainContent>
 );
 
-export const getStaticProps: GetStaticProps = async ({ preview }) => {
+export const getStaticProps: GetStaticProps<Props> = async ({ preview }) => {
   const [contacts, sidebar] = await Promise.all([
     fetchContacts(preview),
     fetchSidebar('kontakt', preview),

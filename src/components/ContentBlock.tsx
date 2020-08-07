@@ -1,14 +1,14 @@
-import { renderDocument } from '../contentful/render';
-import { Document } from '@contentful/rich-text-types';
+import { renderRichText } from '../contentful/render';
+import { ContentfulRichText } from '../contentful/richText';
 
 interface Props {
-  content: Document;
+  content: ContentfulRichText;
 }
 
 const ContentBlock: React.FC<Props> = ({ content }) => {
   return (
     <div className="content">
-      {renderDocument(content)}
+      {renderRichText(content)}
 
       <style jsx>{`
         .content :global(img) {

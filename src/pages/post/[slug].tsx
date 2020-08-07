@@ -1,21 +1,26 @@
 import Head from 'next/head';
 import { NextPage, GetStaticProps, GetStaticPaths } from 'next';
-import { ContentfulPost, fetchPost, fetchPosts } from '../../contentful/data';
 import dayjs from 'dayjs';
-import { renderDocument } from '../../contentful/render';
 import Sidebar from '../../components/Sidebar';
 import PostLink from '../../components/PostLink';
 import { Fragment } from 'react';
-import { getOpenGraphImageUrl } from '../../contentful/utils';
+import { getOGImageUrl } from '../../contentful/utils';
 import NotFoundPage from '../404';
 import HeroImage from '../../components/HeroImage';
 import ContentBlock from '../../components/ContentBlock';
 import MainContent from '../../components/MainContent';
 import { siteName } from '../../config';
+import { fetchPostSlugs } from '../../contentful/postSlugs';
+import { fetchPost, ContentfulPost } from '../../contentful/post';
+import { renderRichText } from '../../contentful/render';
+import {
+  fetchPostSummaries,
+  ContentfulPostSummary,
+} from '../../contentful/postSummaries';
 
 interface Props {
   post: ContentfulPost | null;
-  posts: ContentfulPost[] | null;
+  posts: ContentfulPostSummary[];
 }
 
 const PostPage: NextPage<Props> = ({ post, posts }) => {
@@ -23,7 +28,7 @@ const PostPage: NextPage<Props> = ({ post, posts }) => {
     return <NotFoundPage />;
   }
 
-  const ogImageUrl = getOpenGraphImageUrl(post.image);
+  const { image } = post;
 
   return (
     <MainContent>
@@ -32,9 +37,9 @@ const PostPage: NextPage<Props> = ({ post, posts }) => {
           {post.title} – {siteName}
         </title>
         <meta property="og:title" content={post.title} />
-        {ogImageUrl && (
+        {image && (
           <Fragment>
-            <meta property="og:image" content={ogImageUrl} />
+            <meta property="og:image" content={getOGImageUrl(image.url)} />
             <meta name="twitter:card" content="summary_large_image" />
           </Fragment>
         )}
@@ -42,9 +47,9 @@ const PostPage: NextPage<Props> = ({ post, posts }) => {
 
       <article className="post">
         <h1>{post.title}</h1>
-        {post.image && <HeroImage image={post.image} />}
+        {image && <HeroImage url={image.url} title={image.title} />}
         <p className="date">{dayjs(post.date).format('LL')}</p>
-        {renderDocument(post.lead)}
+        {renderRichText(post.lead)}
         {post.content && <ContentBlock content={post.content} />}
       </article>
 
@@ -72,17 +77,20 @@ const PostPage: NextPage<Props> = ({ post, posts }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps = async ({ params, preview }) => {
+export const getStaticProps: GetStaticProps<Props> = async ({
+  params,
+  preview,
+}) => {
   const slug = params!.slug!;
   const [post, posts] = await Promise.all([
     fetchPost(slug, preview),
-    fetchPosts(),
+    fetchPostSummaries(preview),
   ]);
   return { props: { post, posts } };
 };
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const posts = await fetchPosts();
+  const posts = await fetchPostSlugs();
   const paths = posts.map((post) => ({ params: { slug: post.slug } }));
   return { paths, fallback: false };
 };

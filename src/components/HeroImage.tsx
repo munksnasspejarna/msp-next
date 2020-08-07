@@ -1,20 +1,15 @@
-import { Asset } from 'contentful';
-import { getAssetUrl, getAssetTitle } from '../contentful/utils';
-
 interface Props {
-  image: Asset;
+  url: string;
+  title: string;
 }
 
-const HeroImage: React.FC<Props> = ({ image }) => {
-  const imageUrl = getAssetUrl(image);
-  const imageTitle = getAssetTitle(image);
-
+const HeroImage: React.FC<Props> = ({ url, title }) => {
   return (
     <div className="hero">
       <img
         className="hero-image"
-        src={imageUrl + '?fit=fill&w=1200&h=800'}
-        alt={imageTitle}
+        src={url + '?fit=fill&w=1200&h=800'}
+        alt={title}
       />
 
       <style jsx>{`

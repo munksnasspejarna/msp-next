@@ -2,6 +2,7 @@ import { useRouter } from 'next/router';
 
 const PreviewIndicator: React.FC = () => {
   const router = useRouter();
+  if (!router.isPreview) return null;
   const exitLink = `/api/exit-preview?path=${router.asPath}`;
   return (
     <div className="preview-indicator">

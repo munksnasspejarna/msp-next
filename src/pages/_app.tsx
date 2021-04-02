@@ -19,7 +19,7 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   return (
     <Layout>
       <Header />
-      {pageProps.preview && <PreviewIndicator />}
+      <PreviewIndicator />
       <Component {...pageProps} />
     </Layout>
   );

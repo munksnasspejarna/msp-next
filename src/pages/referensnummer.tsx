@@ -27,11 +27,9 @@ const ReferenceNumberPage: NextPage<Props> = ({ page }) => {
   );
 };
 
-export const getStaticProps: GetStaticProps<Props> = async ({
-  preview = false,
-}) => {
+export const getStaticProps: GetStaticProps<Props> = async ({ preview }) => {
   const [page] = await Promise.all([fetchPage('referensnummer', preview)]);
-  return { props: { page, preview } };
+  return { props: { page } };
 };
 
 export default ReferenceNumberPage;

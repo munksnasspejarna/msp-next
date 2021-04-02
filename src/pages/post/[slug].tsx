@@ -17,7 +17,6 @@ import { ParsedUrlQuery } from 'querystring';
 interface Props {
   post: ContentfulPost | null;
   posts: ContentfulPost[] | null;
-  preview: boolean;
 }
 
 const PostPage: NextPage<Props> = ({ post, posts }) => {
@@ -80,14 +79,14 @@ interface Query extends ParsedUrlQuery {
 
 export const getStaticProps: GetStaticProps<Props, Query> = async ({
   params,
-  preview = false,
+  preview,
 }) => {
   const slug = params!.slug!;
   const [post, posts] = await Promise.all([
     fetchPost(slug, preview),
     fetchPosts(),
   ]);
-  return { props: { post, posts, preview } };
+  return { props: { post, posts } };
 };
 
 export const getStaticPaths: GetStaticPaths<Query> = async () => {

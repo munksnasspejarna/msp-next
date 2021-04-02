@@ -21,7 +21,6 @@ import { ParsedUrlQuery } from 'querystring';
 interface Props {
   page: ContentfulPage | null;
   sidebar: ContentfulSidebar | null;
-  preview: boolean;
 }
 
 const StandardPage: NextPage<Props> = ({ page, sidebar }) => {
@@ -63,14 +62,14 @@ interface Query extends ParsedUrlQuery {
 
 export const getStaticProps: GetStaticProps<Props, Query> = async ({
   params,
-  preview = false,
+  preview,
 }) => {
   const slug = params!.slug;
   const [page, sidebar] = await Promise.all([
     fetchPage(slug, preview),
     fetchSidebar(slug, preview),
   ]);
-  return { props: { page, sidebar, preview } };
+  return { props: { page, sidebar } };
 };
 
 // These pages should not be automatically generated because they are used in custom pages
